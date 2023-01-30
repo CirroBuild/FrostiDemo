@@ -9,6 +9,9 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddJsonFile("appsettings.frosti.json");
 }
 
+builder.Configuration.AddEnvironmentVariables();
+
+
 var client = new SecretClient(new Uri(builder.Configuration["KV_ENDPOINT"]), new DefaultAzureCredential());
 
 // New instance of CosmosClient class
