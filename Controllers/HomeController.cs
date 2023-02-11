@@ -67,6 +67,12 @@ public class HomeController : Controller
         return "Done!";
     }
 
+    public string ApplicationInsights()
+    {
+        _logger.LogError("Testing AI");
+        return "Done!";
+    }
+
     public IActionResult Privacy()
     {
         return View();
