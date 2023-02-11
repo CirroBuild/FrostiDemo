@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Storage.Blobs;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,8 @@ if (builder.Environment.IsDevelopment())
 }
 
 builder.Configuration.AddAzureKeyVault(new Uri(builder.Configuration["KV_ENDPOINT"]), new DefaultAzureCredential());
+
+builder.Services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions { ConnectionString = builder.Configuration["AIConnection"] });
 
 builder.Services.AddSingleton(s =>
 {
