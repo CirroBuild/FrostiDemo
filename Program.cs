@@ -3,6 +3,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
