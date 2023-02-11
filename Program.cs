@@ -1,6 +1,8 @@
-﻿using Azure.Security.KeyVault.Secrets;
-using Azure.Identity;
+﻿using Azure.Identity;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,16 +11,11 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddJsonFile("appsettings.frosti.json");
 }
 
-builder.Configuration.AddEnvironmentVariables();
+builder.Configuration.AddAzureKeyVault(new Uri(builder.Configuration["KV_ENDPOINT"]), new DefaultAzureCredential());
 
-
-var client = new SecretClient(new Uri(builder.Configuration["KV_ENDPOINT"]), new DefaultAzureCredential());
-
-// New instance of CosmosClient class
-var cosmosConnection = client.GetSecret("CosmosConnection").Value.Value;
 builder.Services.AddSingleton(s =>
 {
-    return new CosmosClient(cosmosConnection);
+    return new CosmosClient(builder.Configuration["CosmosConnection"]);
 });
 
 // Add services to the container.
