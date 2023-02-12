@@ -10,6 +10,8 @@ using Azure.Storage.Queues;
 using Azure.Storage.Files.Shares;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Storage.Files.DataLake;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace FrostiDemo.Controllers;
 
@@ -39,7 +41,7 @@ public class HomeController : Controller
         return containerResp.StatusCode;
     }
 
-    public async Task<string> Storage()
+    public async Task<HttpStatusCode> Storage()
     {
         //SHOULD MENTION AZURE STORAGE NAMING REQS IN DOCS. lowercase, dashes (no double dahes, and cant start or end w/ dash), numbers and letters only. table name cant have dashes.
 
@@ -64,13 +66,35 @@ public class HomeController : Controller
         var dataLakeClient = new DataLakeServiceClient(_configuration["StorageConnection"]);
         await dataLakeClient.CreateFileSystemAsync("your-file-system");
 
-        return "Done!";
+        return HttpStatusCode.OK;
     }
 
-    public string ApplicationInsights()
+    public HttpStatusCode ApplicationInsights()
     {
         _logger.LogError("Testing AI");
-        return "Done!";
+        return HttpStatusCode.OK;
+    }
+
+    public HttpStatusCode Sql()
+    {
+        using var myConn = new SqlConnection(_configuration["SQLConnection"]);
+        var str = "CREATE DATABASE TestDB ( EDITION = 'Basic' )";    //See https://learn.microsoft.com/en-us/sql/t-sql/statements/create-database-transact-sql?view=sql-server-ver15&preserve-view=true&tabs=sqlpool
+
+        myConn.Open();
+        var myCommand = new SqlCommand(str, myConn);
+        var result = myCommand.BeginExecuteNonQuery();
+
+        //creating the database does take a second. This is just a quick sample
+        while (!result.IsCompleted)
+        {
+            System.Threading.Thread.Sleep(1000);
+        }
+
+        myCommand.EndExecuteNonQuery(result);
+        myConn.Close();
+
+        //https://github.com/Azure-Samples/msdocs-app-service-sqldb-dotnetcore <- SEE for Entity Framework example
+        return HttpStatusCode.OK;
     }
 
     public IActionResult Privacy()
