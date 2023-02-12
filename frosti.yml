@@ -1,6 +1,6 @@
 variables:
 - name: ServiceConnection
-  value: _YOUR_SERVICE_CONNECTION_ 
+  value: MyConnection 
 
 jobs:
 - job: InfraDeploy
