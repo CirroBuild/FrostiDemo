@@ -32,7 +32,7 @@ jobs:
             echo $myAppNames
             myWebApp=`echo $myAppNames | grep WebAppName | sed -e 's/WebAppName://g'`
             myFunctionApp=`echo $myAppNames | grep FunctionAppName | sed -e 's/FunctionAppName://g'`
-            echo "WEB_APP_NAME={$myWebApp}" >> $GITHUB_OUTPUT
+            echo "WEB_APP_NAME={myWebApp}" >> $GITHUB_OUTPUT
             echo "FUNCTION_APP_NAME={$myFunctionApp}" >> $GITHUB_OUTPUT
             echo $myWebApp
             
@@ -40,6 +40,9 @@ jobs:
     runs-on: macos-latest
     needs: [infraProvision]
     steps:
+      - env:
+          WEB_APP_NAME: ${{needs.infraProvision.outputs.WEB_APP_NAME}}
+          FUNCTION_APP_NAME: ${{needs.infraProvision.outputs.FUNCTION_APP_NAME}}
       - uses: actions/checkout@v3
       
       - name: Setup .NET Core SDK
@@ -50,7 +53,7 @@ jobs:
             7.0.x
             
       - name: TESTTESTSETEST
-        run: echo ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
+        run: echo $WEB_APP_NAME
         
       - name: Install dependencies
         run: dotnet restore
@@ -72,7 +75,7 @@ jobs:
       - name: 'Azure Web Deploy'
         uses: azure/webapps-deploy@v2
         with: 
-          app-name: ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
+          app-name: $WEB_APP_NAME
           package: ./release
       
       - name: logout
