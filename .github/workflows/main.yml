@@ -5,6 +5,9 @@ on: [push]
 jobs:
   infraProvision:
     runs-on: macos-latest
+    outputs:
+        WEB_APP_NAME: ${{ steps.run-frosti.outputs.WEB_APP_NAME }}
+        FUNCTION_APP_NAME: ${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}
     steps:
       - name: Azure Login
         uses: azure/login@v1
@@ -65,7 +68,7 @@ jobs:
       - name: 'Azure Web Deploy'
         uses: azure/webapps-deploy@v2
         with: 
-          app-name: ${{ jobs.infraProvision.steps.run-frosti.outputs.WEB_APP_NAME }}
+          app-name: ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
           package: ./release
       
       - name: logout
