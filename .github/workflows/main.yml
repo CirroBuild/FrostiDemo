@@ -48,7 +48,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with: 
           app-name: FrostiDe-ppe-eus-WebAppf177785f2
-          package: ./release
+          package: release
       
       - name: logout
         run: |
