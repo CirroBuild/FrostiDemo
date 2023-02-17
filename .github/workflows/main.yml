@@ -36,7 +36,7 @@ jobs:
             echo "FUNCTION_APP_NAME=$myFunctionApp" >> $GITHUB_OUTPUT
             
       - name: Display
-        run: echo "${{ steps.run-frosti.outputs.WEB_APP_NAME }}"
+        run: echo "${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}"
             
   buildProject:
     runs-on: macos-latest
@@ -52,7 +52,7 @@ jobs:
             7.0.x
             
       - name: TESTTESTSETEST
-        run: echo ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
+        run: echo ${{ needs.infraProvision.outputs.FUNCTION_APP_NAME }}
         
       - name: Install dependencies
         run: dotnet restore
