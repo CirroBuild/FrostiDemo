@@ -1,6 +1,10 @@
 name: Frosti Provision and Deploy 
 
-on: [push]
+on: 
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
 
 jobs:
   infraProvision:
@@ -28,7 +32,7 @@ jobs:
             az account show
             brew update
             brew install CirroBuild/tap/frosti
-            myAppNames=`frosti provision -e ppe | grep -E 'WebAppName|FunctionAppName'`
+            myAppNames=`frosti provision -s 9d2c0470-601c-4f53-9cd4-d4bfc213328a -e ppe | grep -E 'WebAppName|FunctionAppName'`
             echo $myAppNames
             myWebApp=`echo $myAppNames | grep WebAppName | sed -e 's/WebAppName://g'`
             myFunctionApp=`echo $myAppNames | grep FunctionAppName | sed -e 's/FunctionAppName://g'`
@@ -50,9 +54,6 @@ jobs:
           dotnet-version: | 
             6.0.x
             7.0.x
-            
-      - name: TESTTESTSETEST
-        run: echo ${{ needs.infraProvision.outputs.FUNCTION_APP_NAME }}
         
       - name: Install dependencies
         run: dotnet restore
