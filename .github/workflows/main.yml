@@ -40,9 +40,6 @@ jobs:
     runs-on: macos-latest
     needs: [infraProvision]
     steps:
-      - env:
-          WEB_APP_NAME: ${{needs.infraProvision.outputs.WEB_APP_NAME}}
-          FUNCTION_APP_NAME: ${{needs.infraProvision.outputs.FUNCTION_APP_NAME}}
       - uses: actions/checkout@v3
       
       - name: Setup .NET Core SDK
@@ -73,6 +70,9 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
       - name: 'Azure Web Deploy'
+      - env:
+          WEB_APP_NAME: ${{needs.infraProvision.outputs.WEB_APP_NAME}}
+          FUNCTION_APP_NAME: ${{needs.infraProvision.outputs.FUNCTION_APP_NAME}}
         uses: azure/webapps-deploy@v2
         with: 
           app-name: $WEB_APP_NAME
