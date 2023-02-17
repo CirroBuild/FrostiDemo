@@ -67,4 +67,4 @@ jobs:
       - name: logout
         run: |
           az logout
-    needs: [infraProvision, buildProject]
+    needs: [infraProvision, buildProject] 
