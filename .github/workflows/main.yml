@@ -71,11 +71,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
-      - name: 'Azure Web Deploy'
+      - name: Azure Web Deploy
         if: ${{ needs.infraProvision.outputs.WEB_APP_NAME }} != ''
         uses: azure/webapps-deploy@v2
         with: 
           app-name: ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
+          package: ./release
+          
+      - name: Azure Function Deploy
+        if: ${{ needs.infraProvision.outputs.FUNCTION_APP_NAME }} != ''
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ needs.infraProvision.outputs.FUNCTION_APP_NAME }}
           package: ./release
       
       - name: logout
