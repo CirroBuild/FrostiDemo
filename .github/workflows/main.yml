@@ -1,0 +1,28 @@
+name: Build and Deploy ProjectFTK
+
+on: [push]
+
+jobs:
+  buildProject:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: | 
+            6.0.x
+            7.0.x
+            
+      - name: Install dependencies
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build ProjectFTK.csproj --configuration Release --no-restore
+      
+      - name: Test
+        run: dotnet test ProjectFTK.csproj --no-restore --verbosity normal
+        
+      - name: Publish
+        run: dotnet publish ProjectFTK.csproj -c Release --output ./Release
