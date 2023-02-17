@@ -1,8 +1,36 @@
-name: Build and Deploy ProjectFTK
+name: Frosti Provision and Deploy 
 
 on: [push]
 
 jobs:
+  infraProvision:
+    runs-on: macos-latest
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Run Frosti
+        id: run-frosti
+        run: |
+            az --version
+            az account show
+            brew update
+            brew install CirroBuild/tap/frosti
+            myAppNames=`frosti provision -e ppe | grep -E 'WebAppName|FunctionAppName'`
+            echo $myAppNames
+            myWebApp=`$myAppNames | grep WebAppName | sed -e 's/WebAppName://g'`
+            myFunctionApp=`$myAppNames | grep FunctionAppName | sed -e 's/FunctionAppName://g'`
+            echo $myWebApp
+  
   buildProject:
     runs-on: macos-latest
     steps:
@@ -26,8 +54,9 @@ jobs:
         
       - name: Publish
         run: dotnet publish FrostiDemo.csproj -c Release --output ./Release
-        
-            # Deploy to Azure Web apps
+  
+  codeDeploy:
+    runs-on: macos-latest
       - name: 'Run Azure webapp deploy action using publish profile credentials'
         uses: azure/webapps-deploy@v2
         with: 
@@ -37,3 +66,4 @@ jobs:
       - name: logout
         run: |
           az logout
+    needs: [infraProvision, buildProject]
