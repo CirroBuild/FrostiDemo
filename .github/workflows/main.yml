@@ -26,3 +26,14 @@ jobs:
         
       - name: Publish
         run: dotnet publish FrostiDemo.csproj -c Release --output ./Release
+        
+            # Deploy to Azure Web apps
+      - name: 'Run Azure webapp deploy action using publish profile credentials'
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: FrostiDe-ppe-eus-WebAppf177785f2
+          package: ./Release
+      
+      - name: logout
+        run: |
+          az logout
