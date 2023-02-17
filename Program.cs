@@ -17,9 +17,11 @@ builder.Configuration.AddAzureKeyVault(new Uri(builder.Configuration["KV_ENDPOIN
 
 builder.Services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions { ConnectionString = builder.Configuration["AIConnection"] });
 
+var cosmos = new CosmosClient(builder.Configuration["CosmosConnection"]);
+
 builder.Services.AddSingleton(s =>
 {
-    return new CosmosClient(builder.Configuration["CosmosConnection"]);
+    return cosmos;
 });
 
 // Add services to the container.

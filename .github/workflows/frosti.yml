@@ -1,0 +1,90 @@
+name: Frosti Provision and Deploy 
+
+on: [push]
+
+jobs:
+  infraProvision:
+    runs-on: macos-latest
+    outputs:
+        WEB_APP_NAME: ${{ steps.run-frosti.outputs.WEB_APP_NAME }}
+        FUNCTION_APP_NAME: ${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Run Frosti
+        id: run-frosti
+        run: |
+            az --version
+            az account show
+            brew update
+            brew install CirroBuild/tap/frosti
+            myAppNames=`frosti provision -e ppe | grep -E 'WebAppName|FunctionAppName'`
+            echo $myAppNames
+            myWebApp=`echo $myAppNames | grep WebAppName | sed -e 's/WebAppName://g'`
+            myFunctionApp=`echo $myAppNames | grep FunctionAppName | sed -e 's/FunctionAppName://g'`
+            echo "WEB_APP_NAME=$myWebApp" >> $GITHUB_OUTPUT
+            echo "FUNCTION_APP_NAME=$myFunctionApp" >> $GITHUB_OUTPUT
+            
+      - name: Display
+        run: echo "${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}"
+            
+  buildProject:
+    runs-on: macos-latest
+    needs: [infraProvision]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: | 
+            6.0.x
+            7.0.x
+            
+      - name: TESTTESTSETEST
+        run: echo ${{ needs.infraProvision.outputs.FUNCTION_APP_NAME }}
+        
+      - name: Install dependencies
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build FrostiDemo.csproj --configuration Release --no-restore
+      
+      - name: Test
+        run: dotnet test FrostiDemo.csproj --no-restore --verbosity normal
+        
+      - name: Publish
+        run: dotnet publish FrostiDemo.csproj -c Release --output ./release
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Azure Web Deploy
+        if: needs.infraProvision.outputs.WEB_APP_NAME != null && needs.infraProvision.outputs.WEB_APP_NAME != ''
+        uses: azure/webapps-deploy@v2
+        with: 
+          app-name: ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
+          package: ./release
+          
+      - name: Azure Function Deploy
+        if: needs.infraProvision.outputs.FUNCTION_APP_NAME != null && needs.infraProvision.outputs.FUNCTION_APP_NAME != ''
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ needs.infraProvision.outputs.FUNCTION_APP_NAME }}
+          package: ./release
+      
+      - name: logout
+        run: |
+          az logout 
