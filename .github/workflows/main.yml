@@ -52,7 +52,7 @@ jobs:
             7.0.x
             
       - name: TESTTESTSETEST
-        run: echo $WEB_APP_NAME
+        run: echo ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
         
       - name: Install dependencies
         run: dotnet restore
