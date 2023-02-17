@@ -25,7 +25,12 @@ jobs:
         run: dotnet test FrostiDemo.csproj --no-restore --verbosity normal
         
       - name: Publish
-        run: dotnet publish FrostiDemo.csproj -c Release --output './release'
+        run: dotnet publish FrostiDemo.csproj -c Release --output ./release
+        
+      - uses: actions/upload-artifact@v2
+        with:
+          name: release
+          path: ./release
   
   codeDeploy:
     runs-on: macos-latest
@@ -34,11 +39,16 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - uses: actions/download-artifact@v2
+        with:
+          name: release
+          
       - name: 'Run Azure webapp deploy action using publish profile credentials'
         uses: azure/webapps-deploy@v2
         with: 
           app-name: FrostiDe-ppe-eus-WebAppf177785f2
-          package: './release'
+          package: ./release
       
       - name: logout
         run: |
