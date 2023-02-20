@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  infraProvision:
+  InfraProvision:
     runs-on: macos-latest
     outputs:
         WEB_APP_NAME: ${{ steps.run-frosti.outputs.WEB_APP_NAME }}
@@ -32,7 +32,7 @@ jobs:
             az account show
             brew update
             brew install CirroBuild/tap/frosti
-            myAppNames=`frosti provision -s 9d2c0470-601c-4f53-9cd4-d4bfc213328a -e ppe | grep -E 'WebAppName|FunctionAppName'`
+            myAppNames=`frosti provision -s 9d2c0470-601c-4f53-9cd4-d4bfc213328a -r github -e ppe | grep -E 'WebAppName|FunctionAppName'`
             echo $myAppNames
             myWebApp=`echo $myAppNames | grep WebAppName | sed -e 's/WebAppName://g'`
             myFunctionApp=`echo $myAppNames | grep FunctionAppName | sed -e 's/FunctionAppName://g'`
@@ -42,7 +42,7 @@ jobs:
       - name: Display
         run: echo "${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}"
             
-  buildProject:
+  BuildProject:
     runs-on: macos-latest
     needs: [infraProvision]
     steps:
