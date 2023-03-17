@@ -7,6 +7,9 @@ on:
       - 'master'
   workflow_dispatch:
 
+env:
+  FRAMEWORK: django
+
 jobs:
   InfraProvision:
     runs-on: macos-latest
@@ -45,7 +48,8 @@ jobs:
             
   BuildProject:
     runs-on: macos-latest
-    needs: [infraProvision]
+    if: $FRAMEWORK == 'dotnet'
+    needs: [InfraProvision]
     steps:
       - uses: actions/checkout@v3
       
