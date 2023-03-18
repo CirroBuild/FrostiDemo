@@ -10,6 +10,7 @@ on:
 jobs:
   InfraProvision:
     runs-on: macos-latest
+    if: ${{ 'django' == 'dotnet'}}
     outputs:
         WEB_APP_NAME: ${{ steps.run-frosti.outputs.WEB_APP_NAME }}
         FUNCTION_APP_NAME: ${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}
