@@ -10,7 +10,6 @@ on:
 jobs:
   InfraProvision:
     runs-on: macos-latest
-    if: ${{ 'django' == 'dotnet'}}
     outputs:
         WEB_APP_NAME: ${{ steps.run-frosti.outputs.WEB_APP_NAME }}
         FUNCTION_APP_NAME: ${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}
@@ -44,9 +43,9 @@ jobs:
       - name: Display
         run: echo "${{ steps.run-frosti.outputs.FUNCTION_APP_NAME }}"
             
-  BuildProject:
+  DeployDotNet:
     runs-on: macos-latest
-    if: ${{ 'django' }} == 'dotnet'
+    if: ${{ 'dotnet' == 'dotnet' }}
     needs: [InfraProvision]
     steps:
       - uses: actions/checkout@v3
@@ -92,3 +91,45 @@ jobs:
       - name: logout
         run: |
           az logout 
+          
+  DeployDjango:
+    runs-on: macos-latest
+    if: ${{ 'dotnet' == 'django' }}
+    needs: [InfraProvision]
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Set up Homebrew
+      id: set-up-homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+      
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+       python-version: 3.8
+       
+    - name: python install
+      working-directory: .
+      run: |
+       brew install python
+       pip3 install -r requirements.txt
+       
+    - uses: azure/login@v1
+      with:
+       creds: ${{ secrets.AZURE_CREDENTIALS }}
+       
+    - uses: azure/appservice-settings@v1
+      with:
+       app-name: ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
+       mask-inputs: false
+       general-settings-json: '{"linuxFxVersion": "PYTHON|3.8"}' #'General configuration settings as Key Value pairs'
+
+    - uses: azure/webapps-deploy@v2
+      with:
+       app-name: ${{ needs.infraProvision.outputs.WEB_APP_NAME }}
+       package: .
+    
+    - name: logout
+      run: |
+       az logout
+
