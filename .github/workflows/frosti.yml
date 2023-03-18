@@ -48,7 +48,7 @@ jobs:
             
   BuildProject:
     runs-on: macos-latest
-    if: $FRAMEWORK == 'dotnet'
+    if: env.FRAMEWORK == 'dotnet'
     needs: [InfraProvision]
     steps:
       - uses: actions/checkout@v3
